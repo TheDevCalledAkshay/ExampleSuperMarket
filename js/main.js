@@ -1,11 +1,9 @@
 // SILSA — animation engine
 window.addEventListener('load',()=>{setTimeout(()=>document.getElementById('preloader')?.classList.add('done'),900);});
 gsap.registerPlugin(ScrollTrigger);
-// reveals
-document.querySelectorAll('.reveal').forEach(el=>{
-gsap.to(el,{opacity:1,y:0,duration:1,ease:'power3.out',
-scrollTrigger:{trigger:el,start:'top 88%'}});
-});
+// reveals — IntersectionObserver (no GSAP transform fights, cards stay perfect)
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 // counters
 document.querySelectorAll('[data-count]').forEach(el=>{
 const end=+el.dataset.count;
@@ -13,8 +11,9 @@ ScrollTrigger.create({trigger:el,start:'top 90%',once:true,onEnter:()=>{
 let o={v:0};gsap.to(o,{v:end,duration:2,ease:'power2.out',onUpdate:()=>{el.textContent=Math.floor(o.v).toLocaleString()+(end>1000?'+':'');}});
 }});
 });
-// tilt
+// tilt — only hero/world/quote cards, never product grid items
 document.querySelectorAll('.tilt').forEach(card=>{
+if(card.classList.contains('item')||card.classList.contains('prod'))return;
 card.addEventListener('mousemove',e=>{
 const r=card.getBoundingClientRect();
 const x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
